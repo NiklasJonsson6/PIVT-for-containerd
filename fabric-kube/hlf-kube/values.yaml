@@ -50,6 +50,15 @@ peer:
   persistence:
     enabled: false
     size: 16Gi
+  docker:
+    dind: 
+      # use a side car docker in docker container?
+      enabled: true
+      # dind docker image
+      image: docker:19.03.8-dind
+      persistence:
+        enabled: false
+        size: 16Gi
   ingress:
     enabled: false
     annotations:
