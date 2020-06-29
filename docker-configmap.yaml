@@ -1,0 +1,51 @@
+# From https://github.com/IBM/blockchain-network-on-kubernetes/pull/28
+# Note: not currently used, a docker sidecar for each peer is used instead
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docker
+  labels:
+    run: docker
+    fqdn: docker
+    addToHostAliases: "true"
+spec:
+  selector:
+    name: docker
+  ports:
+  - protocol: TCP
+    targetPort: 2375
+    port: 2375
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docker-dind
+  labels:
+    app: docker
+spec:
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: docker
+  template:
+    metadata:
+      labels:
+        app: docker
+        name: docker
+    spec:
+      volumes:
+      - name: dockervolume
+        persistentVolumeClaim:
+          claimName: docker-pvc
+      containers:
+      - name: docker
+        securityContext:
+          privileged: true
+        image: "docker:stable-dind"
+        ports:
+        - containerPort: 2375
+        volumeMounts:
+        - mountPath: /var/lib/docker
+          name: dockervolume

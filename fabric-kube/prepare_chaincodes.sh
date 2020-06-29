@@ -20,6 +20,6 @@ chaincodes=$(yq ".network.chaincodes[].name" $config_file -c -r)
 for chaincode in $chaincodes; do
   echo "creating hlf-kube/chaincode/$chaincode.tar"
   
-  tar -czf hlf-kube/chaincode/$chaincode.tar -C $chaincode_folder $chaincode/
+  tar --exclude='./node_modules' -czf hlf-kube/chaincode/$chaincode.tar -C $chaincode_folder $chaincode/
 done
 
