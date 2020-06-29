@@ -1,3 +1,6 @@
+# PIVT for containerd
+Very similar to the recent [docker-dind](https://github.com/APGGroeiFabriek/PIVT/tree/docker-dind) branch of the original repo. Config files for running docker in a separate pod also added but not properly tested. To test, point the docker socket path of the peers to the docker pod `docker:2375` rather than localhost and remove the docker sidecar from `fabric-kube/hlf-kube/templates/peer-statefulset.yaml` or set the `peer.docker.dind.enabled` flag to false in Helm.
+
 # Hyperledger Fabric meets Kubernetes
 ![Fabric Meets K8S](https://raft-fabric-kube.s3-eu-west-1.amazonaws.com/images/fabric_meets_k8s.png)
 
