@@ -329,6 +329,8 @@ spec:
           value: {{ $.Values.peer.chaincode.logging.level }}
         - name: CORE_CHAINCODE_LOGGING_SHIM
           value: {{ $.Values.peer.chaincode.logging.shim }}
+        - name: CORE_CHAINCODE_BUILDER
+          value: hyperledger/fabric-ccenv:1.4
         - name: CORE_VM_DOCKER_ATTACHSTDOUT
           value: {{ $.Values.peer.chaincode.attachStdout | quote }} 
         
