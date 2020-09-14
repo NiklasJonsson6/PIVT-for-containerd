@@ -213,24 +213,25 @@ spec:
       limit: {{ $.Values.retryCount }}
     script:
       # image: hyperledger/fabric-tools:{{ $.Values.hyperledgerVersion }}
-      image: raft/hl-fabric-tools:1.4.3
+      # if peer channel checkexists --channelID {{ $channel.name }} -o {{ $vars.ordererUrl }} \
+      #           {{- if $.Values.tlsEnabled }}
+      #               --tls --cafile /hlf_config/orderer-tlsca/tlscacert.pem \
+      #           {{- end }}
+      #       ; then 
+      #         echo '-- Channel {{ $channel.name }} already exists, exiting with 0' 
+      #         exit 0 
+      #       else 
+      #         result=$? 
+      #         echo "-- result is: $result" 
+      #         if test $result -ne 99; then 
+      #           echo "-- result is not 99, exiting with $result" 
+      #           exit $result 
+      #         fi 
+      #       fi 
+      image: bftsmart/fabric-tools:amd64-1.3.0
       command: [sh]
       source: |
-          if peer channel checkexists --channelID {{ $channel.name }} -o {{ $vars.ordererUrl }} \
-                {{- if $.Values.tlsEnabled }}
-                    --tls --cafile /hlf_config/orderer-tlsca/tlscacert.pem \
-                {{- end }}
-            ; then 
-              echo '-- Channel {{ $channel.name }} already exists, exiting with 0' 
-              exit 0 
-            else 
-              result=$? 
-              echo "-- result is: $result" 
-              if test $result -ne 99; then 
-                echo "-- result is not 99, exiting with $result" 
-                exit $result 
-              fi 
-            fi 
+          
 
             echo '-- Channel {{ $channel.name }} does not exists, will create..' 
 
@@ -299,21 +300,20 @@ spec:
       limit: {{ $.Values.retryCount }}
     script:
       # image: hyperledger/fabric-tools:{{ $.Values.hyperledgerVersion }}
-      image: raft/hl-fabric-tools:1.4.3
+      # if peer channel checkjoined --channelID {{ $channel.name }}; then  
+      #       echo '-- Peer {{ $peer }} already joined to channel {{ $channel.name }}, exiting with 0' 
+      #       exit 0 
+      #     else 
+      #       result=$? 
+      #       echo "-- result is: $result" 
+      #       if test $result -ne 99; then 
+      #         echo "-- result is not 99, exiting with $result" 
+      #         exit $result 
+      #       fi 
+      #     fi 
+      image: bftsmart/fabric-tools:amd64-1.3.0
       command: [sh]
       source: |
-          if peer channel checkjoined --channelID {{ $channel.name }}; then  
-            echo '-- Peer {{ $peer }} already joined to channel {{ $channel.name }}, exiting with 0' 
-            exit 0 
-          else 
-            result=$? 
-            echo "-- result is: $result" 
-            if test $result -ne 99; then 
-              echo "-- result is not 99, exiting with $result" 
-              exit $result 
-            fi 
-          fi 
-
           echo '-- Peer {{ $peer }} did not join to channel {{ $channel.name }}, will join..' 
 
           peer channel fetch oldest /var/hyperledger/genesis.pb -c {{ $channel.name }} -o {{ $vars.ordererUrl }} \
@@ -376,25 +376,24 @@ spec:
       limit: {{ $.Values.retryCount }}
     script:
       # image: hyperledger/fabric-tools:{{ $.Values.hyperledgerVersion }}
-      image: raft/hl-fabric-tools-extended:1.4.3
+      # if peer channel checkanchors --channelID {{ $channel.name }} --orgID {{ $org.Name }}MSP -o {{ $vars.ordererUrl }} \
+      #         {{- if $.Values.tlsEnabled }}
+      #             --tls --cafile /hlf_config/orderer-tlsca/tlscacert.pem \
+      #         {{- end }}
+      #     ; then 
+      #       echo '-- AnchorPeers are already configured for organization {{ $org.Name }}, exiting with 0' 
+      #       exit 0 
+      #     else 
+      #       result=$? 
+      #       echo "-- result is: $result" 
+      #       if test $result -ne 99; then 
+      #         echo "-- result is not 99, exiting with $result" 
+      #         exit $result 
+      #       fi 
+      #     fi 
+      image: bftsmart/fabric-tools:amd64-1.3.0
       command: [sh]
       source: |
-          if peer channel checkanchors --channelID {{ $channel.name }} --orgID {{ $org.Name }}MSP -o {{ $vars.ordererUrl }} \
-              {{- if $.Values.tlsEnabled }}
-                  --tls --cafile /hlf_config/orderer-tlsca/tlscacert.pem \
-              {{- end }}
-          ; then 
-            echo '-- AnchorPeers are already configured for organization {{ $org.Name }}, exiting with 0' 
-            exit 0 
-          else 
-            result=$? 
-            echo "-- result is: $result" 
-            if test $result -ne 99; then 
-              echo "-- result is not 99, exiting with $result" 
-              exit $result 
-            fi 
-          fi 
-          
           echo '-- AnchorPeers are not configured for organization {{ $org.Name }}, will configure..' 
           
           mkdir -p /work && 

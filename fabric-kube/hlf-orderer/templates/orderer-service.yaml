@@ -1,0 +1,54 @@
+{{- $org := index .Values.OrdererOrgs 1 }}
+{{- range $i, $host := until ($org.Template.Count | int) }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hlf-orderer--{{ $org.Name | lower }}--{{ $i | toString | lower }}
+  labels:
+    name: hlf-orderer--{{ $org.Name | lower }}--{{ $i | toString | lower }}
+    component: hlf-orderer
+    fqdn: {{ $i | toString }}.{{ $org.Domain }}
+spec:
+  clusterIP: None
+  selector:
+    app: hlf-orderer--{{ $org.Name | lower }}--{{ $i | toString | lower }}
+  ports:
+  - protocol: TCP
+    port: 11000
+    name: grpc
+---
+{{- end }} {{- /* org.Template.Count */ -}}
+
+# The frontend
+{{- $org := index .Values.OrdererOrgs 0 }}
+{{- $i := 1000 }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hlf-orderer--{{ $org.Name | lower }}--{{ $i | toString | lower }}
+  labels:
+    name: hlf-orderer--{{ $org.Name | lower }}--{{ $i | toString | lower }}
+    component: hlf-orderer
+    fqdn: {{ $i | toString }}.{{ $org.Domain }}
+    addToHostAliases: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: hlf-orderer--{{ $org.Name | lower }}--{{ $i | toString | lower }}
+  ports:
+  - protocol: TCP
+    port: 7050
+    name: grpc
+  {{- if $.Values.orderer.cluster.enabled }}
+  - protocol: TCP
+    port: {{ $.Values.orderer.cluster.port }}
+    name: grpc-cluster
+  {{- end }}  
+  # to verify 
+  {{- if $.Values.orderer.operations.enabled }}  
+  - protocol: TCP
+    port: {{ $.Values.orderer.operations.servicePort }}
+    name: operations  
+  {{- end }}
