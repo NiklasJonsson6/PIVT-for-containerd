@@ -6,7 +6,9 @@
   {{- $_ := set $vars "ordererTlsSecret"  (printf "hlf-orderer--%s-external-tlsca" ($vars.ordererOrgName | lower)) }}
 {{- else }}
   {{- $ordererOrg := index .Values.OrdererOrgs 0 }}
-  {{- $ordererAddress := $.Values.useActualDomains | ternary (printf "%s.%s" (index $ordererOrg.Specs 0).Hostname $ordererOrg.Domain) (printf "hlf-orderer--%s--%s" ($ordererOrg.Name | lower) ((index $ordererOrg.Specs 0).Hostname | lower)) }} 
+  {{- $hostname := (index $ordererOrg.Specs 0).Hostname | toString }}
+  #{{- $ordererAddress := $.Values.useActualDomains | ternary (printf "%s.%s" $hostname $ordererOrg.Domain) (printf "hlf-orderer--%s--%s" ($ordererOrg.Name | lower) $hostname) }} 
+  {{- $ordererAddress := "hlf-orderer--frontends--1000" }}
   {{- $_ := set $vars "ordererOrgName" $ordererOrg.Name }}
   {{- $_ := set $vars "ordererUrl" (printf "%s:7050" $ordererAddress ) }}
   {{- $_ := set $vars "ordererHost" (index $ordererOrg.Specs 0).Hostname }}
@@ -74,6 +76,8 @@ spec:
       items:
       - key: cacert.pem
         path: cacerts/ca.{{ $org.Domain}}-cert.pem
+      - key: admincert.pem
+        path: admincerts/Admin@.{{ $org.Domain}}-cert.pem
 
 {{- range $peerIndex := until ($org.Template.Count | int) }}
 {{- $peer := (printf "peer%s" ($peerIndex | toString)) }}
@@ -231,8 +235,6 @@ spec:
       image: bftsmart/fabric-tools:amd64-1.3.0
       command: [sh]
       source: |
-          
-
             echo '-- Channel {{ $channel.name }} does not exists, will create..' 
 
             mkdir -p /work && 
@@ -395,6 +397,9 @@ spec:
       command: [sh]
       source: |
           echo '-- AnchorPeers are not configured for organization {{ $org.Name }}, will configure..' 
+          curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+          python get-pip.py
+          pip install yq
           
           mkdir -p /work && 
           peer channel fetch config /work/config_block.pb -c {{ $channel.name }} -o {{ $vars.ordererUrl }} \

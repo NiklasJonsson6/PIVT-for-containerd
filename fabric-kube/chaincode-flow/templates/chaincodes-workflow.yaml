@@ -6,10 +6,12 @@
   {{- $_ := set $vars "ordererTlsSecret"  (printf "hlf-orderer--%s-external-tlsca" ($vars.ordererOrgName | lower)) }}
 {{- else }}
   {{- $ordererOrg := index .Values.OrdererOrgs 0 }}
-  {{- $ordererAddress := $.Values.useActualDomains | ternary (printf "%s.%s" (index $ordererOrg.Specs 0).Hostname $ordererOrg.Domain) (printf "hlf-orderer--%s--%s" ($ordererOrg.Name | lower) ((index $ordererOrg.Specs 0).Hostname | lower)) }} 
+  {{- $hostname := (index $ordererOrg.Specs 0).Hostname | toString }}
+  #{{- $ordererAddress := $.Values.useActualDomains | ternary (printf "%s.%s" $hostname $ordererOrg.Domain) (printf "hlf-orderer--%s--%s" ($ordererOrg.Name | lower) $hostname) }} 
+  {{- $ordererAddress := "hlf-orderer--frontends--1000" }}
   {{- $_ := set $vars "ordererOrgName" $ordererOrg.Name }}
   {{- $_ := set $vars "ordererUrl" (printf "%s:7050" $ordererAddress ) }}
-  {{- $_ := set $vars "ordererHost" (index $ordererOrg.Specs 0).Hostname }}
+  {{- $_ := set $vars "ordererHost" $hostname }}
   {{- $_ := set $vars "ordererTlsSecret"  (printf "hlf-orderer--%s-tlsca" ($ordererOrg.Name | lower)) }}
 {{- end }}
 
@@ -331,7 +333,13 @@ spec:
     retryStrategy:
       limit: {{ $.Values.retryCount }}
     script:
-      # image: hyperledger/fabric-tools:{{ $.Values.hyperledgerVersion }}
+      # image: bftsmart/fabric-tools:amd64-1.3.0
+      # command: [sh]
+      # source: |
+      #       echo '-- Chaincode {{ $chaincode.name }} is not instantiated on channel {{ $channel.name }}, will instantiate..' 
+      #       peer chaincode instantiate --name {{ $chaincode.name }} --version {{ $version }} --lang {{ $language }} \
+      #             --channelID {{ $channel.name }} --orderer {{ $vars.ordererUrl }} \
+      #             --policy "{{ $channel.policy }}" --ctor '{"Args":[""]}'
       image: raft/hl-fabric-tools:1.4.3
       command: [sh]
       source: |
@@ -346,9 +354,7 @@ spec:
               exit $result 
             fi 
           fi 
-
           echo '-- Chaincode {{ $chaincode.name }} version {{ $version }} is not instantiated on channel {{ $channel.name }}, will check another version..' 
-
           if peer chaincode checkinstantiated --name {{ $chaincode.name }} --channelID {{ $channel.name }}; then  
             echo '-- Chaincode {{ $chaincode.name }} with another version is already instantiated on channel {{ $channel.name }}, will perform an upgrade chaincode transaction..' 
             doUpgrade=true 
@@ -360,7 +366,6 @@ spec:
               exit $result 
             fi 
           fi 
-
           if [ -z "$doUpgrade" ]; then 
             echo '-- Chaincode {{ $chaincode.name }} is not instantiated on channel {{ $channel.name }}, will instantiate..' 
             peer chaincode instantiate --name {{ $chaincode.name }} --version {{ $version }} --lang {{ $language }} \
@@ -377,6 +382,7 @@ spec:
                   --tls --cafile /hlf_config/orderer-tlsca/tlscacert.pem \
             {{- end }}
           ; fi
+
 
       volumeMounts:
         - mountPath: /hlf_config/orderer-tlsca

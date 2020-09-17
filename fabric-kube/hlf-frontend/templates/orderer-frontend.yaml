@@ -1,0 +1,84 @@
+{{- $org := index $.Values.OrdererOrgs 1 }}
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hlf-orderer--frontends--1000
+spec:
+  serviceName: hlf-orderer--frontends--1000
+  selector:
+    matchLabels:
+      app: hlf-orderer--frontends--1000
+  template:
+    metadata:
+      labels:
+        name: hlf-orderer
+        org: hlf-orderer--frontends
+        app: hlf-orderer--frontends--1000
+    spec:
+      volumes:
+      - name: frontend-material
+        secret:
+          secretName: frontend-material
+          items:
+          - key: genesis.block
+            path: genesis.block
+          - key: hosts.config
+            path: hosts.config
+          - key: node.config
+            path: node.config
+          - key: system.config
+            path: system.config
+          - key: keystore.pem
+            path: keys/keystore.pem
+          - key: cert1000.pem
+            path: keys/cert1000.pem
+          {{- range $ii, $e := until ($org.Template.Count | int) }}
+          - key: cert{{ $ii | toString }}.pem
+            path: keys/cert{{ $ii | toString }}.pem
+          {{- end }}
+      - name: frontend-msp
+        secret: 
+          secretName: frontend-msp
+          items:
+          - key: orderer.yaml
+            path: orderer.yaml
+          - key: cert.pem
+            path: msp/signcerts/cert.pem
+          - key: key.pem
+            path: msp/keystore/key.pem
+          - key: cacert.pem
+            path: msp/cacerts/ca.{{ $org.Domain }}-cert.pem
+          - key: admincert.pem
+            path: msp/admincerts/cert.pem
+
+      {{- if $.Values.hostAliases }}
+      hostAliases:
+      {{- range $i, $alias := $.Values.hostAliases }}
+      - ip: {{ $alias.ip }}
+        hostnames: {{ $alias.hostnames }}
+      {{- end }}
+      {{- end }}{{""}}
+
+      containers: 
+      - name: frontend
+        image: bftsmart/fabric-frontend:amd64-1.3.0
+        args: ["1000"]
+
+        volumeMounts:
+        - mountPath: /bft-config/config/
+          name: frontend-material
+        - mountPath: /bft-config/fabric/
+          name: frontend-msp
+
+        env:
+        - name: FRONTEND_CONFIG_DIR
+          value: /bft-config/config/
+        - name: FABRIC_CFG_PATH
+          value: /bft-config/fabric/
+        # - name: ORDERER_GENERAL_GENESISFILE
+        #   value: /bft-config/config/genesis.block
+        # - name: ORDERER_GENERAL_LOCALMSPID
+        #   value: FrontendsMSP
+        # - name: ORDERER_GENERAL_LOCALMSPDIR
+        #   value: /bft-config/fabric/msp

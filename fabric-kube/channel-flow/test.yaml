@@ -1,0 +1,437 @@
+---
+# Source: channel-flow/templates/channel-workflow.yaml
+# useActualDomains: true
+# externalOrderer.enabled: false
+# ordererOrgName: Frontends
+# ordererUrl: map[Hostname:1000].yoleanfront.se:7050
+# ordererHost: 1000
+# ordererTlsSecret: hlf-orderer--frontends-tlsca
+
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: hlf-channels-
+  # name: hlf-channels-0
+spec:
+  entrypoint: channels
+
+  # additional entries going into /etc/hosts file
+  hostAliases:
+  - ip: 10.98.214.93
+    hostnames: [1000.yoleanfront.se]
+  - ip: 10.106.97.2
+    hostnames: [peer0.yolean.se]
+  - ip: 10.104.121.24
+    hostnames: [peer0.yolean2.se]
+  
+  volumes:
+  - name: hlf-scripts
+    configMap:
+      name: hlf-scripts
+      defaultMode: 0777 # make scripts executable
+  - name: hlf-configtx
+    secret:
+      secretName: hlf-configtx.yaml
+  - name: orderer-tlsca
+    secret:
+      secretName: hlf-orderer--frontends-tlsca
+
+  - name: peer-yolean-admin-msp
+    secret:
+      secretName: hlf-peer--yolean--admin-msp
+      items:
+      - key: config.yaml
+        path: config.yaml
+      - key: cert.pem
+        path: signcerts/cert.pem
+      - key: key.pem
+        path: keystore/key.pem
+      - key: cacert.pem
+        path: cacerts/ca.yolean.se-cert.pem
+      - key: tlscacert.pem
+        path: tlscacerts/cert.pem
+      - key: admincert.pem
+        path: admincerts/cert.pem
+
+  - name: peer-yolean-msp
+    secret:
+      secretName: hlf-peer--yolean--msp
+      items:
+      - key: cacert.pem
+        path: cacerts/ca.yolean.se-cert.pem
+
+  - name: peer-yolean-peer0-tls
+    secret:
+      secretName: hlf-peer--yolean--peer0-tls
+
+
+  - name: peer-yolean2-admin-msp
+    secret:
+      secretName: hlf-peer--yolean2--admin-msp
+      items:
+      - key: config.yaml
+        path: config.yaml
+      - key: cert.pem
+        path: signcerts/cert.pem
+      - key: key.pem
+        path: keystore/key.pem
+      - key: cacert.pem
+        path: cacerts/ca.yolean2.se-cert.pem
+      - key: tlscacert.pem
+        path: tlscacerts/cert.pem
+      - key: admincert.pem
+        path: admincerts/cert.pem
+
+  - name: peer-yolean2-msp
+    secret:
+      secretName: hlf-peer--yolean2--msp
+      items:
+      - key: cacert.pem
+        path: cacerts/ca.yolean2.se-cert.pem
+
+  - name: peer-yolean2-peer0-tls
+    secret:
+      secretName: hlf-peer--yolean2--peer0-tls
+
+
+  templates:
+  - name: channels
+    steps:
+# top level: channels
+    -
+      - name: channel--meeting1
+        template: channel--meeting1
+
+# second level: channel templates
+  - name: channel--meeting1
+    steps:
+    - - name: create-channel--meeting1
+        template: create-channel--meeting1
+    - - name: join-channel--meeting1
+        template: join-channel--meeting1
+    - - name: update-channel--meeting1
+        template: update-channel--meeting1
+
+# third level: channel create templates
+
+  - name: create-channel--meeting1
+    steps:
+    -
+
+      - name: maybe-create-channel--meeting1--Yolean
+        template: maybe-create-channel--meeting1--Yolean
+
+# third level: channel join templates
+
+  - name: join-channel--meeting1
+    steps:
+    -
+      - name: maybe-join-channel--meeting1--Yolean--peer0
+        template: maybe-join-channel--meeting1--Yolean--peer0
+      - name: maybe-join-channel--meeting1--Yolean2--peer0
+        template: maybe-join-channel--meeting1--Yolean2--peer0
+
+# third level: channel update templates
+
+  - name: update-channel--meeting1
+    steps:
+    -
+      - name: maybe-update-channel--meeting1--Yolean
+        template: maybe-update-channel--meeting1--Yolean
+      - name: maybe-update-channel--meeting1--Yolean2
+        template: maybe-update-channel--meeting1--Yolean2
+
+# leaf create templates
+
+  - name: maybe-create-channel--meeting1--Yolean
+    # channel: meeting1
+    # org: Yolean
+    inputs:
+    retryStrategy:
+      limit: 4
+    script:
+      # image: hyperledger/fabric-tools:1.4.5
+      # if peer channel checkexists --channelID meeting1 -o map[Hostname:1000].yoleanfront.se:7050 \
+      #
+      #       ; then 
+      #         echo '-- Channel meeting1 already exists, exiting with 0' 
+      #         exit 0 
+      #       else 
+      #         result=$? 
+      #         echo "-- result is: $result" 
+      #         if test $result -ne 99; then 
+      #           echo "-- result is not 99, exiting with $result" 
+      #           exit $result 
+      #         fi 
+      #       fi 
+      image: bftsmart/fabric-tools:amd64-1.3.0
+      command: [sh]
+      source: |
+            echo '-- Channel meeting1 does not exists, will create..' 
+
+            mkdir -p /work && 
+            configtxgen -profile meeting1 -channelID meeting1 -configPath /hlf_config \
+                  -outputCreateChannelTx /work/meeting1.tx && 
+            
+            peer channel create -o map[Hostname:1000].yoleanfront.se:7050 -c meeting1 -f /work/meeting1.tx \
+
+      volumeMounts:
+        - mountPath: /hlf_config/orderer-tlsca
+          name: orderer-tlsca
+        - mountPath: /etc/hyperledger/fabric/msp/
+          name: peer-yolean-admin-msp
+        - mountPath: /hlf_config/
+          name: hlf-configtx
+
+        # peer org msp's required for configtxgen
+        - mountPath: /hlf_config/crypto-config/peerOrganizations/yolean.se/msp/
+          name: peer-yolean-msp
+        - mountPath: /hlf_config/crypto-config/peerOrganizations/yolean2.se/msp/
+          name: peer-yolean2-msp
+        # external peer org msp's required for configtxgen
+      
+      env:
+        - name: FABRIC_LOGGING_SPEC
+          value: info
+        - name: CORE_PEER_LOCALMSPID
+          value: YoleanMSP
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: /etc/hyperledger/fabric/tls/server.crt
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: /etc/hyperledger/fabric/tls/server.key
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: /etc/hyperledger/fabric/tls/ca.crt
+
+# leaf join templates
+
+  - name: maybe-join-channel--meeting1--Yolean--peer0
+    # channel: meeting1
+    # org: Yolean
+    # peer: peer0
+    inputs:
+    retryStrategy:
+      limit: 4
+    script:
+      # image: hyperledger/fabric-tools:1.4.5
+      # if peer channel checkjoined --channelID meeting1; then  
+      #       echo '-- Peer peer0 already joined to channel meeting1, exiting with 0' 
+      #       exit 0 
+      #     else 
+      #       result=$? 
+      #       echo "-- result is: $result" 
+      #       if test $result -ne 99; then 
+      #         echo "-- result is not 99, exiting with $result" 
+      #         exit $result 
+      #       fi 
+      #     fi 
+      image: bftsmart/fabric-tools:amd64-1.3.0
+      command: [sh]
+      source: |
+          echo '-- Peer peer0 did not join to channel meeting1, will join..' 
+
+          peer channel fetch oldest /var/hyperledger/genesis.pb -c meeting1 -o map[Hostname:1000].yoleanfront.se:7050 \
+          && echo '-- fetched genesis block for channel meeting1' && 
+          
+          peer channel join -b /var/hyperledger/genesis.pb
+
+      volumeMounts:
+        - mountPath: /hlf_config/orderer-tlsca
+          name: orderer-tlsca
+        - mountPath: /etc/hyperledger/fabric/tls/
+          name: peer-yolean-peer0-tls
+        - mountPath: /etc/hyperledger/fabric/msp/
+          name: peer-yolean-admin-msp
+      
+      env:
+        - name: CORE_PEER_ADDRESS
+          value: |-
+                peer0.yolean.se:7051
+        - name: CORE_PEER_TLS_ENABLED
+          value: "false"
+        - name: FABRIC_LOGGING_SPEC
+          value: info
+        - name: CORE_PEER_LOCALMSPID
+          value: YoleanMSP
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: /etc/hyperledger/fabric/tls/server.crt
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: /etc/hyperledger/fabric/tls/server.key
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: /etc/hyperledger/fabric/tls/ca.crt
+
+  - name: maybe-join-channel--meeting1--Yolean2--peer0
+    # channel: meeting1
+    # org: Yolean2
+    # peer: peer0
+    inputs:
+    retryStrategy:
+      limit: 4
+    script:
+      # image: hyperledger/fabric-tools:1.4.5
+      # if peer channel checkjoined --channelID meeting1; then  
+      #       echo '-- Peer peer0 already joined to channel meeting1, exiting with 0' 
+      #       exit 0 
+      #     else 
+      #       result=$? 
+      #       echo "-- result is: $result" 
+      #       if test $result -ne 99; then 
+      #         echo "-- result is not 99, exiting with $result" 
+      #         exit $result 
+      #       fi 
+      #     fi 
+      image: bftsmart/fabric-tools:amd64-1.3.0
+      command: [sh]
+      source: |
+          echo '-- Peer peer0 did not join to channel meeting1, will join..' 
+
+          peer channel fetch oldest /var/hyperledger/genesis.pb -c meeting1 -o map[Hostname:1000].yoleanfront.se:7050 \
+          && echo '-- fetched genesis block for channel meeting1' && 
+          
+          peer channel join -b /var/hyperledger/genesis.pb
+
+      volumeMounts:
+        - mountPath: /hlf_config/orderer-tlsca
+          name: orderer-tlsca
+        - mountPath: /etc/hyperledger/fabric/tls/
+          name: peer-yolean2-peer0-tls
+        - mountPath: /etc/hyperledger/fabric/msp/
+          name: peer-yolean2-admin-msp
+      
+      env:
+        - name: CORE_PEER_ADDRESS
+          value: |-
+                peer0.yolean2.se:7051
+        - name: CORE_PEER_TLS_ENABLED
+          value: "false"
+        - name: FABRIC_LOGGING_SPEC
+          value: info
+        - name: CORE_PEER_LOCALMSPID
+          value: Yolean2MSP
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: /etc/hyperledger/fabric/tls/server.crt
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: /etc/hyperledger/fabric/tls/server.key
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: /etc/hyperledger/fabric/tls/ca.crt
+
+# leaf update templates
+
+  - name: maybe-update-channel--meeting1--Yolean
+    # channel: meeting1
+    # org: Yolean
+    inputs:
+    retryStrategy:
+      limit: 4
+    script:
+      # image: hyperledger/fabric-tools:1.4.5
+      # if peer channel checkanchors --channelID meeting1 --orgID YoleanMSP -o map[Hostname:1000].yoleanfront.se:7050 \
+      #
+      #     ; then 
+      #       echo '-- AnchorPeers are already configured for organization Yolean, exiting with 0' 
+      #       exit 0 
+      #     else 
+      #       result=$? 
+      #       echo "-- result is: $result" 
+      #       if test $result -ne 99; then 
+      #         echo "-- result is not 99, exiting with $result" 
+      #         exit $result 
+      #       fi 
+      #     fi 
+      image: bftsmart/fabric-tools:amd64-1.3.0
+      command: [sh]
+      source: |
+          echo '-- AnchorPeers are not configured for organization Yolean, will configure..' 
+          
+          mkdir -p /work && 
+          peer channel fetch config /work/config_block.pb -c meeting1 -o map[Hostname:1000].yoleanfront.se:7050 \
+          &&  echo '-- fetched config block' && 
+          
+          configtxlator proto_decode --input /work/config_block.pb --type common.Block | jq .data.data[0].payload.data.config > /work/config.json && 
+          echo '-- trimmed envelope from config block and converted to json' && 
+          
+          /hlf-scripts/attach_anchor_peers.sh YoleanMSP /hlf_config/configtx.yaml /work/config.json /work/updated_config.json && 
+          /hlf-scripts/prepare_config_update_block.sh meeting1 /work/config.json /work/updated_config.json /work/update.pb && 
+          
+          peer channel update -f /work/update.pb -c meeting1 -o map[Hostname:1000].yoleanfront.se:7050 \
+
+      volumeMounts:
+        - mountPath: /hlf_config/orderer-tlsca
+          name: orderer-tlsca
+        - mountPath: /etc/hyperledger/fabric/msp/
+          name: peer-yolean-admin-msp
+        - mountPath: /hlf-scripts
+          name: hlf-scripts
+        - mountPath: /hlf_config/
+          name: hlf-configtx
+      
+      env:
+        - name: FABRIC_LOGGING_SPEC
+          value: info
+        - name: CORE_PEER_LOCALMSPID
+          value: YoleanMSP
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: /etc/hyperledger/fabric/tls/server.crt
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: /etc/hyperledger/fabric/tls/server.key
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: /etc/hyperledger/fabric/tls/ca.crt
+
+  - name: maybe-update-channel--meeting1--Yolean2
+    # channel: meeting1
+    # org: Yolean2
+    inputs:
+    retryStrategy:
+      limit: 4
+    script:
+      # image: hyperledger/fabric-tools:1.4.5
+      # if peer channel checkanchors --channelID meeting1 --orgID Yolean2MSP -o map[Hostname:1000].yoleanfront.se:7050 \
+      #
+      #     ; then 
+      #       echo '-- AnchorPeers are already configured for organization Yolean2, exiting with 0' 
+      #       exit 0 
+      #     else 
+      #       result=$? 
+      #       echo "-- result is: $result" 
+      #       if test $result -ne 99; then 
+      #         echo "-- result is not 99, exiting with $result" 
+      #         exit $result 
+      #       fi 
+      #     fi 
+      image: bftsmart/fabric-tools:amd64-1.3.0
+      command: [sh]
+      source: |
+          echo '-- AnchorPeers are not configured for organization Yolean2, will configure..' 
+          
+          mkdir -p /work && 
+          peer channel fetch config /work/config_block.pb -c meeting1 -o map[Hostname:1000].yoleanfront.se:7050 \
+          &&  echo '-- fetched config block' && 
+          
+          configtxlator proto_decode --input /work/config_block.pb --type common.Block | jq .data.data[0].payload.data.config > /work/config.json && 
+          echo '-- trimmed envelope from config block and converted to json' && 
+          
+          /hlf-scripts/attach_anchor_peers.sh Yolean2MSP /hlf_config/configtx.yaml /work/config.json /work/updated_config.json && 
+          /hlf-scripts/prepare_config_update_block.sh meeting1 /work/config.json /work/updated_config.json /work/update.pb && 
+          
+          peer channel update -f /work/update.pb -c meeting1 -o map[Hostname:1000].yoleanfront.se:7050 \
+
+      volumeMounts:
+        - mountPath: /hlf_config/orderer-tlsca
+          name: orderer-tlsca
+        - mountPath: /etc/hyperledger/fabric/msp/
+          name: peer-yolean2-admin-msp
+        - mountPath: /hlf-scripts
+          name: hlf-scripts
+        - mountPath: /hlf_config/
+          name: hlf-configtx
+      
+      env:
+        - name: FABRIC_LOGGING_SPEC
+          value: info
+        - name: CORE_PEER_LOCALMSPID
+          value: Yolean2MSP
+        - name: CORE_PEER_TLS_CERT_FILE
+          value: /etc/hyperledger/fabric/tls/server.crt
+        - name: CORE_PEER_TLS_KEY_FILE
+          value: /etc/hyperledger/fabric/tls/server.key
+        - name: CORE_PEER_TLS_ROOTCERT_FILE
+          value: /etc/hyperledger/fabric/tls/ca.crt

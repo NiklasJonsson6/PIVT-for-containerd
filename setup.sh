@@ -21,7 +21,20 @@ chaincode_folder=../../chaincode/
 # In essence: 
 # # cp -r $project_folder/crypto-config hlf-kube/
 # # cp -r $project_folder/channel-artifacts hlf-kube/
-# # cp -r $project_folder/configtx.yaml hlf-kube/
+rm -rf hlf-kube/crypto-config
+rm -rf hlf-kube/channel-artifacts
+rm -rf hlf-orderer/crypto-config
+rm -rf hlf-orderer/channel-artifacts
+rm -rf hlf-frontend/crypto-config
+rm -rf hlf-frontend/channel-artifacts
+cp -r $project_folder/crypto-config hlf-kube/
+cp -r $project_folder/channel-artifacts hlf-kube/
+cp -r $project_folder/crypto-config hlf-orderer/
+cp -r $project_folder/channel-artifacts hlf-orderer/
+cp -r $project_folder/crypto-config hlf-frontend/
+cp -r $project_folder/channel-artifacts hlf-frontend/
+
+cp -r $project_folder/configtx.yaml hlf-kube/
 # # # prepare chaincodes
 # # ./prepare_chaincodes.sh $project_folder $chaincode_folder
 
@@ -30,6 +43,8 @@ chaincode_folder=../../chaincode/
    # already done manually for now
 # Copy channel-artifacts/ (containing genesis.block), place the block in orderingnode-material aswell (who caeres about duplicates)
 # Copy contigtx.yaml
+# Copy orderingnode-material, crypto-config, channel-artifacts to frontend
+
 # Prepare chaincode
 ./prepare_chaincodes.sh $project_folder $chaincode_folder
 
@@ -54,11 +69,17 @@ helm upgrade hlf-kube ./hlf-kube -f $project_folder/network.yaml -f $project_fol
 
 echo "-- waiting for all pods to start --"
 kubectl wait --for condition=ready pods --all
-# start frontend
+
+# The ordering nodes should be ready, start frontend
 # Apply hostAliases to frontend as well
+helm install hlf-frontend ./hlf-frontend -f $project_folder/network.yaml \
+-f $project_folder/crypto-config.yaml -f $project_folder/hostAliases.yaml
 
-#echo "-- create the channel(s) --"
-#helm template channel-flow/ -f $project_folder/network.yaml -f $project_folder/crypto-config.yaml -f $project_folder/hostAliases.yaml | argo submit - --watch
+echo "-- waiting for frontend to start --"
+kubectl wait --for condition=ready pods --all
 
-#echo "-- install chaincodes --"
-#helm template chaincode-flow/ -f $project_folder/network.yaml -f $project_folder/crypto-config.yaml -f $project_folder/hostAliases.yaml | argo submit - --watch
+echo "-- create the channel(s) --"
+helm template channel-flow/ -f $project_folder/network.yaml -f $project_folder/crypto-config.yaml -f $project_folder/hostAliases.yaml | argo submit - --watch
+
+echo "-- install chaincodes --"
+helm template chaincode-flow/ -f $project_folder/network.yaml -f $project_folder/crypto-config.yaml -f $project_folder/hostAliases.yaml | argo submit - --watch
