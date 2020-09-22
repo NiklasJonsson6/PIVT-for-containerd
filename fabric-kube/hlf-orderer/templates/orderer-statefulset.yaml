@@ -61,6 +61,11 @@ spec:
         env:
         - name: NODE_CONFIG_DIR
           value: /bft-config/config/
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
 ---
 
 {{- end }} {{- /* org.Specs */ -}}
