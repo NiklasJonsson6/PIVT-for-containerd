@@ -13,7 +13,7 @@ fi
 set -e
 
 cd ./fabric-kube/
-project_folder=../../bft-config/
+project_folder=../../bft-7-config/
 chaincode_folder=../../chaincode/
 
 #echo "-- creating necessary stuff --"
