@@ -78,11 +78,14 @@ helm install hlf-frontend ./hlf-frontend -f $project_folder/network.yaml \
 echo "-- waiting for frontend to start --"
 kubectl wait --for condition=ready pods --all
 
-echo "-- sleeping 15 seconds to give time to the ordering service --"
+echo "-- sleeping to give time to the ordering service --"
 sleep 15
 
 echo "-- create the channel(s) --"
 helm template channel-flow/ -f $project_folder/network.yaml -f $project_folder/crypto-config.yaml -f $project_folder/hostAliases.yaml | argo submit - --watch
+
+echo "-- sleeping.. --"
+sleep 5
 
 echo "-- install chaincodes --"
 helm template chaincode-flow/ -f $project_folder/network.yaml -f $project_folder/crypto-config.yaml -f $project_folder/hostAliases.yaml | argo submit - --watch
