@@ -13,7 +13,7 @@ fi
 set -e
 
 cd ./fabric-kube/
-project_folder=../../bft-7-config/
+project_folder=../../bft-10-config/
 chaincode_folder=../../chaincode/
 
 #echo "-- creating necessary stuff --"
@@ -56,9 +56,9 @@ helm install hlf-kube ./hlf-kube -f $project_folder/network.yaml \
 -f $project_folder/crypto-config.yaml \
 --set orderer.cluster.enabled=true --set peer.launchPods=false --set orderer.launchPods=false
 # orderer services
-helm install hlf-orderer ./hlf-orderer -f $project_folder/network.yaml \
--f $project_folder/crypto-config.yaml \
---set orderer.launchPods=true
+# helm install hlf-orderer ./hlf-orderer -f $project_folder/network.yaml \
+# -f $project_folder/crypto-config.yaml \
+# --set orderer.launchPods=true
 
 echo "-- collect the host aliases --"
 ./collect_host_aliases.sh $project_folder
@@ -79,7 +79,7 @@ echo "-- waiting for frontend to start --"
 kubectl wait --for condition=ready pods --all
 
 echo "-- sleeping 15 seconds to give time to the ordering service --"
-sleep 15
+sleep 20
 
 echo "-- create the channel(s) --"
 helm template channel-flow/ -f $project_folder/network.yaml -f $project_folder/crypto-config.yaml -f $project_folder/hostAliases.yaml | argo submit - --watch

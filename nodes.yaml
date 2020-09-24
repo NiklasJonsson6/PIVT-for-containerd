@@ -1,0 +1,749 @@
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hlf-orderer--orderingnodes--0
+spec:
+  serviceName: hlf-orderer--orderingnodes--0
+  selector:
+    matchLabels:
+      app: hlf-orderer--orderingnodes--0
+  template:
+    metadata:
+      labels:
+        name: hlf-orderer
+        org: hlf-orderer--orderingnodes
+        app: hlf-orderer--orderingnodes--0
+    spec:
+      volumes:
+      - name: orderingnode-material
+        secret:
+          secretName: orderingnode-material--0
+          items:
+          - key: genesis.block
+            path: genesis.block
+          - key: hosts.config
+            path: hosts.config
+          - key: node.config
+            path: node.config
+          - key: system.config
+            path: system.config
+          - key: keystore.pem
+            path: keys/keystore.pem
+          - key: cert1000.pem
+            path: keys/cert1000.pem
+          - key: cert0.pem
+            path: keys/cert0.pem
+          - key: cert1.pem
+            path: keys/cert1.pem
+          - key: cert2.pem
+            path: keys/cert2.pem
+          - key: cert3.pem
+            path: keys/cert3.pem
+          - key: cert4.pem
+            path: keys/cert4.pem
+          - key: cert5.pem
+            path: keys/cert5.pem
+          - key: cert6.pem
+            path: keys/cert6.pem
+          - key: cert7.pem
+            path: keys/cert7.pem
+          - key: cert8.pem
+            path: keys/cert8.pem
+          - key: cert9.pem
+            path: keys/cert9.pem
+
+      #
+
+      containers: 
+      - name: orderer
+        image: bftsmart/fabric-orderingnode:amd64-1.3.0
+        args: ["0"]
+
+        volumeMounts:
+        - mountPath: /bft-config/config/
+          name: orderingnode-material
+
+        env:
+        - name: NODE_CONFIG_DIR
+          value: /bft-config/config/
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+---
+# Source: hlf-orderer/templates/orderer-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hlf-orderer--orderingnodes--1
+spec:
+  serviceName: hlf-orderer--orderingnodes--1
+  selector:
+    matchLabels:
+      app: hlf-orderer--orderingnodes--1
+  template:
+    metadata:
+      labels:
+        name: hlf-orderer
+        org: hlf-orderer--orderingnodes
+        app: hlf-orderer--orderingnodes--1
+    spec:
+      volumes:
+      - name: orderingnode-material
+        secret:
+          secretName: orderingnode-material--1
+          items:
+          - key: genesis.block
+            path: genesis.block
+          - key: hosts.config
+            path: hosts.config
+          - key: node.config
+            path: node.config
+          - key: system.config
+            path: system.config
+          - key: keystore.pem
+            path: keys/keystore.pem
+          - key: cert1000.pem
+            path: keys/cert1000.pem
+          - key: cert0.pem
+            path: keys/cert0.pem
+          - key: cert1.pem
+            path: keys/cert1.pem
+          - key: cert2.pem
+            path: keys/cert2.pem
+          - key: cert3.pem
+            path: keys/cert3.pem
+          - key: cert4.pem
+            path: keys/cert4.pem
+          - key: cert5.pem
+            path: keys/cert5.pem
+          - key: cert6.pem
+            path: keys/cert6.pem
+          - key: cert7.pem
+            path: keys/cert7.pem
+          - key: cert8.pem
+            path: keys/cert8.pem
+          - key: cert9.pem
+            path: keys/cert9.pem
+
+      #
+
+      containers: 
+      - name: orderer
+        image: bftsmart/fabric-orderingnode:amd64-1.3.0
+        args: ["1"]
+
+        volumeMounts:
+        - mountPath: /bft-config/config/
+          name: orderingnode-material
+
+        env:
+        - name: NODE_CONFIG_DIR
+          value: /bft-config/config/
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+---
+# Source: hlf-orderer/templates/orderer-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hlf-orderer--orderingnodes--2
+spec:
+  serviceName: hlf-orderer--orderingnodes--2
+  selector:
+    matchLabels:
+      app: hlf-orderer--orderingnodes--2
+  template:
+    metadata:
+      labels:
+        name: hlf-orderer
+        org: hlf-orderer--orderingnodes
+        app: hlf-orderer--orderingnodes--2
+    spec:
+      volumes:
+      - name: orderingnode-material
+        secret:
+          secretName: orderingnode-material--2
+          items:
+          - key: genesis.block
+            path: genesis.block
+          - key: hosts.config
+            path: hosts.config
+          - key: node.config
+            path: node.config
+          - key: system.config
+            path: system.config
+          - key: keystore.pem
+            path: keys/keystore.pem
+          - key: cert1000.pem
+            path: keys/cert1000.pem
+          - key: cert0.pem
+            path: keys/cert0.pem
+          - key: cert1.pem
+            path: keys/cert1.pem
+          - key: cert2.pem
+            path: keys/cert2.pem
+          - key: cert3.pem
+            path: keys/cert3.pem
+          - key: cert4.pem
+            path: keys/cert4.pem
+          - key: cert5.pem
+            path: keys/cert5.pem
+          - key: cert6.pem
+            path: keys/cert6.pem
+          - key: cert7.pem
+            path: keys/cert7.pem
+          - key: cert8.pem
+            path: keys/cert8.pem
+          - key: cert9.pem
+            path: keys/cert9.pem
+
+      #
+
+      containers: 
+      - name: orderer
+        image: bftsmart/fabric-orderingnode:amd64-1.3.0
+        args: ["2"]
+
+        volumeMounts:
+        - mountPath: /bft-config/config/
+          name: orderingnode-material
+
+        env:
+        - name: NODE_CONFIG_DIR
+          value: /bft-config/config/
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+---
+# Source: hlf-orderer/templates/orderer-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hlf-orderer--orderingnodes--3
+spec:
+  serviceName: hlf-orderer--orderingnodes--3
+  selector:
+    matchLabels:
+      app: hlf-orderer--orderingnodes--3
+  template:
+    metadata:
+      labels:
+        name: hlf-orderer
+        org: hlf-orderer--orderingnodes
+        app: hlf-orderer--orderingnodes--3
+    spec:
+      volumes:
+      - name: orderingnode-material
+        secret:
+          secretName: orderingnode-material--3
+          items:
+          - key: genesis.block
+            path: genesis.block
+          - key: hosts.config
+            path: hosts.config
+          - key: node.config
+            path: node.config
+          - key: system.config
+            path: system.config
+          - key: keystore.pem
+            path: keys/keystore.pem
+          - key: cert1000.pem
+            path: keys/cert1000.pem
+          - key: cert0.pem
+            path: keys/cert0.pem
+          - key: cert1.pem
+            path: keys/cert1.pem
+          - key: cert2.pem
+            path: keys/cert2.pem
+          - key: cert3.pem
+            path: keys/cert3.pem
+          - key: cert4.pem
+            path: keys/cert4.pem
+          - key: cert5.pem
+            path: keys/cert5.pem
+          - key: cert6.pem
+            path: keys/cert6.pem
+          - key: cert7.pem
+            path: keys/cert7.pem
+          - key: cert8.pem
+            path: keys/cert8.pem
+          - key: cert9.pem
+            path: keys/cert9.pem
+
+      #
+
+      containers: 
+      - name: orderer
+        image: bftsmart/fabric-orderingnode:amd64-1.3.0
+        args: ["3"]
+
+        volumeMounts:
+        - mountPath: /bft-config/config/
+          name: orderingnode-material
+
+        env:
+        - name: NODE_CONFIG_DIR
+          value: /bft-config/config/
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+---
+# Source: hlf-orderer/templates/orderer-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hlf-orderer--orderingnodes--4
+spec:
+  serviceName: hlf-orderer--orderingnodes--4
+  selector:
+    matchLabels:
+      app: hlf-orderer--orderingnodes--4
+  template:
+    metadata:
+      labels:
+        name: hlf-orderer
+        org: hlf-orderer--orderingnodes
+        app: hlf-orderer--orderingnodes--4
+    spec:
+      volumes:
+      - name: orderingnode-material
+        secret:
+          secretName: orderingnode-material--4
+          items:
+          - key: genesis.block
+            path: genesis.block
+          - key: hosts.config
+            path: hosts.config
+          - key: node.config
+            path: node.config
+          - key: system.config
+            path: system.config
+          - key: keystore.pem
+            path: keys/keystore.pem
+          - key: cert1000.pem
+            path: keys/cert1000.pem
+          - key: cert0.pem
+            path: keys/cert0.pem
+          - key: cert1.pem
+            path: keys/cert1.pem
+          - key: cert2.pem
+            path: keys/cert2.pem
+          - key: cert3.pem
+            path: keys/cert3.pem
+          - key: cert4.pem
+            path: keys/cert4.pem
+          - key: cert5.pem
+            path: keys/cert5.pem
+          - key: cert6.pem
+            path: keys/cert6.pem
+          - key: cert7.pem
+            path: keys/cert7.pem
+          - key: cert8.pem
+            path: keys/cert8.pem
+          - key: cert9.pem
+            path: keys/cert9.pem
+
+      #
+
+      containers: 
+      - name: orderer
+        image: bftsmart/fabric-orderingnode:amd64-1.3.0
+        args: ["4"]
+
+        volumeMounts:
+        - mountPath: /bft-config/config/
+          name: orderingnode-material
+
+        env:
+        - name: NODE_CONFIG_DIR
+          value: /bft-config/config/
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+---
+# Source: hlf-orderer/templates/orderer-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hlf-orderer--orderingnodes--5
+spec:
+  serviceName: hlf-orderer--orderingnodes--5
+  selector:
+    matchLabels:
+      app: hlf-orderer--orderingnodes--5
+  template:
+    metadata:
+      labels:
+        name: hlf-orderer
+        org: hlf-orderer--orderingnodes
+        app: hlf-orderer--orderingnodes--5
+    spec:
+      volumes:
+      - name: orderingnode-material
+        secret:
+          secretName: orderingnode-material--5
+          items:
+          - key: genesis.block
+            path: genesis.block
+          - key: hosts.config
+            path: hosts.config
+          - key: node.config
+            path: node.config
+          - key: system.config
+            path: system.config
+          - key: keystore.pem
+            path: keys/keystore.pem
+          - key: cert1000.pem
+            path: keys/cert1000.pem
+          - key: cert0.pem
+            path: keys/cert0.pem
+          - key: cert1.pem
+            path: keys/cert1.pem
+          - key: cert2.pem
+            path: keys/cert2.pem
+          - key: cert3.pem
+            path: keys/cert3.pem
+          - key: cert4.pem
+            path: keys/cert4.pem
+          - key: cert5.pem
+            path: keys/cert5.pem
+          - key: cert6.pem
+            path: keys/cert6.pem
+          - key: cert7.pem
+            path: keys/cert7.pem
+          - key: cert8.pem
+            path: keys/cert8.pem
+          - key: cert9.pem
+            path: keys/cert9.pem
+
+      #
+
+      containers: 
+      - name: orderer
+        image: bftsmart/fabric-orderingnode:amd64-1.3.0
+        args: ["5"]
+
+        volumeMounts:
+        - mountPath: /bft-config/config/
+          name: orderingnode-material
+
+        env:
+        - name: NODE_CONFIG_DIR
+          value: /bft-config/config/
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+---
+# Source: hlf-orderer/templates/orderer-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hlf-orderer--orderingnodes--6
+spec:
+  serviceName: hlf-orderer--orderingnodes--6
+  selector:
+    matchLabels:
+      app: hlf-orderer--orderingnodes--6
+  template:
+    metadata:
+      labels:
+        name: hlf-orderer
+        org: hlf-orderer--orderingnodes
+        app: hlf-orderer--orderingnodes--6
+    spec:
+      volumes:
+      - name: orderingnode-material
+        secret:
+          secretName: orderingnode-material--6
+          items:
+          - key: genesis.block
+            path: genesis.block
+          - key: hosts.config
+            path: hosts.config
+          - key: node.config
+            path: node.config
+          - key: system.config
+            path: system.config
+          - key: keystore.pem
+            path: keys/keystore.pem
+          - key: cert1000.pem
+            path: keys/cert1000.pem
+          - key: cert0.pem
+            path: keys/cert0.pem
+          - key: cert1.pem
+            path: keys/cert1.pem
+          - key: cert2.pem
+            path: keys/cert2.pem
+          - key: cert3.pem
+            path: keys/cert3.pem
+          - key: cert4.pem
+            path: keys/cert4.pem
+          - key: cert5.pem
+            path: keys/cert5.pem
+          - key: cert6.pem
+            path: keys/cert6.pem
+          - key: cert7.pem
+            path: keys/cert7.pem
+          - key: cert8.pem
+            path: keys/cert8.pem
+          - key: cert9.pem
+            path: keys/cert9.pem
+
+      #
+
+      containers: 
+      - name: orderer
+        image: bftsmart/fabric-orderingnode:amd64-1.3.0
+        args: ["6"]
+
+        volumeMounts:
+        - mountPath: /bft-config/config/
+          name: orderingnode-material
+
+        env:
+        - name: NODE_CONFIG_DIR
+          value: /bft-config/config/
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+---
+# Source: hlf-orderer/templates/orderer-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hlf-orderer--orderingnodes--7
+spec:
+  serviceName: hlf-orderer--orderingnodes--7
+  selector:
+    matchLabels:
+      app: hlf-orderer--orderingnodes--7
+  template:
+    metadata:
+      labels:
+        name: hlf-orderer
+        org: hlf-orderer--orderingnodes
+        app: hlf-orderer--orderingnodes--7
+    spec:
+      volumes:
+      - name: orderingnode-material
+        secret:
+          secretName: orderingnode-material--7
+          items:
+          - key: genesis.block
+            path: genesis.block
+          - key: hosts.config
+            path: hosts.config
+          - key: node.config
+            path: node.config
+          - key: system.config
+            path: system.config
+          - key: keystore.pem
+            path: keys/keystore.pem
+          - key: cert1000.pem
+            path: keys/cert1000.pem
+          - key: cert0.pem
+            path: keys/cert0.pem
+          - key: cert1.pem
+            path: keys/cert1.pem
+          - key: cert2.pem
+            path: keys/cert2.pem
+          - key: cert3.pem
+            path: keys/cert3.pem
+          - key: cert4.pem
+            path: keys/cert4.pem
+          - key: cert5.pem
+            path: keys/cert5.pem
+          - key: cert6.pem
+            path: keys/cert6.pem
+          - key: cert7.pem
+            path: keys/cert7.pem
+          - key: cert8.pem
+            path: keys/cert8.pem
+          - key: cert9.pem
+            path: keys/cert9.pem
+
+      #
+
+      containers: 
+      - name: orderer
+        image: bftsmart/fabric-orderingnode:amd64-1.3.0
+        args: ["7"]
+
+        volumeMounts:
+        - mountPath: /bft-config/config/
+          name: orderingnode-material
+
+        env:
+        - name: NODE_CONFIG_DIR
+          value: /bft-config/config/
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+---
+# Source: hlf-orderer/templates/orderer-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hlf-orderer--orderingnodes--8
+spec:
+  serviceName: hlf-orderer--orderingnodes--8
+  selector:
+    matchLabels:
+      app: hlf-orderer--orderingnodes--8
+  template:
+    metadata:
+      labels:
+        name: hlf-orderer
+        org: hlf-orderer--orderingnodes
+        app: hlf-orderer--orderingnodes--8
+    spec:
+      volumes:
+      - name: orderingnode-material
+        secret:
+          secretName: orderingnode-material--8
+          items:
+          - key: genesis.block
+            path: genesis.block
+          - key: hosts.config
+            path: hosts.config
+          - key: node.config
+            path: node.config
+          - key: system.config
+            path: system.config
+          - key: keystore.pem
+            path: keys/keystore.pem
+          - key: cert1000.pem
+            path: keys/cert1000.pem
+          - key: cert0.pem
+            path: keys/cert0.pem
+          - key: cert1.pem
+            path: keys/cert1.pem
+          - key: cert2.pem
+            path: keys/cert2.pem
+          - key: cert3.pem
+            path: keys/cert3.pem
+          - key: cert4.pem
+            path: keys/cert4.pem
+          - key: cert5.pem
+            path: keys/cert5.pem
+          - key: cert6.pem
+            path: keys/cert6.pem
+          - key: cert7.pem
+            path: keys/cert7.pem
+          - key: cert8.pem
+            path: keys/cert8.pem
+          - key: cert9.pem
+            path: keys/cert9.pem
+
+      #
+
+      containers: 
+      - name: orderer
+        image: bftsmart/fabric-orderingnode:amd64-1.3.0
+        args: ["8"]
+
+        volumeMounts:
+        - mountPath: /bft-config/config/
+          name: orderingnode-material
+
+        env:
+        - name: NODE_CONFIG_DIR
+          value: /bft-config/config/
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
+---
+# Source: hlf-orderer/templates/orderer-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hlf-orderer--orderingnodes--9
+spec:
+  serviceName: hlf-orderer--orderingnodes--9
+  selector:
+    matchLabels:
+      app: hlf-orderer--orderingnodes--9
+  template:
+    metadata:
+      labels:
+        name: hlf-orderer
+        org: hlf-orderer--orderingnodes
+        app: hlf-orderer--orderingnodes--9
+    spec:
+      volumes:
+      - name: orderingnode-material
+        secret:
+          secretName: orderingnode-material--9
+          items:
+          - key: genesis.block
+            path: genesis.block
+          - key: hosts.config
+            path: hosts.config
+          - key: node.config
+            path: node.config
+          - key: system.config
+            path: system.config
+          - key: keystore.pem
+            path: keys/keystore.pem
+          - key: cert1000.pem
+            path: keys/cert1000.pem
+          - key: cert0.pem
+            path: keys/cert0.pem
+          - key: cert1.pem
+            path: keys/cert1.pem
+          - key: cert2.pem
+            path: keys/cert2.pem
+          - key: cert3.pem
+            path: keys/cert3.pem
+          - key: cert4.pem
+            path: keys/cert4.pem
+          - key: cert5.pem
+            path: keys/cert5.pem
+          - key: cert6.pem
+            path: keys/cert6.pem
+          - key: cert7.pem
+            path: keys/cert7.pem
+          - key: cert8.pem
+            path: keys/cert8.pem
+          - key: cert9.pem
+            path: keys/cert9.pem
+
+      #
+
+      containers: 
+      - name: orderer
+        image: bftsmart/fabric-orderingnode:amd64-1.3.0
+        args: ["9"]
+
+        volumeMounts:
+        - mountPath: /bft-config/config/
+          name: orderingnode-material
+
+        env:
+        - name: NODE_CONFIG_DIR
+          value: /bft-config/config/
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
