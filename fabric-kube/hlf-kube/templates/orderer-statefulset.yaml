@@ -186,6 +186,11 @@ spec:
           name: orderer-msp
         - mountPath: /var/hyperledger/orderer/
           name: genesis
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
         
         env:
         # TODO move configurable ones to configmaps
